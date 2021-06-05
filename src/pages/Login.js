@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 
 import axios from "axios";
 
-export const Login = () => {
+export const Login = ({ history }) => {
   const [activeTab, setActiveTab] = useState("login");
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const [formIsValid, setFormIsValid] = useState(false);
 
   const { email, password } = formData;
 
@@ -17,10 +19,47 @@ export const Login = () => {
   };
 
   const handleChange = ({ target }) => {
+    isValid(target);
+
     setFormData({
       ...formData,
       [target.name]: target.value,
     });
+  };
+
+  const isValid = (el) => {
+    const val = el.value;
+    const name = el.name;
+
+    const emailRules = name === "email" && !val.includes("@");
+    const passRules = name === "password" && val.length < 8;
+
+    if (val === "" || passRules || emailRules) {
+      el.classList.add("is-invalid");
+      el.classList.remove("is-valid");
+    } else {
+      el.classList.add("is-valid");
+      el.classList.remove("is-invalid");
+    }
+  };
+
+  const hanldeFormSate = () => {
+    const emailVal = formData.email;
+    const passVal = formData.password;
+
+    const emailRules = emailVal != "" && emailVal.includes("@");
+    const passRules = passVal != "" && passVal.length >= 8;
+
+    const isValid = passRules & emailRules ? true : false;
+    setFormIsValid(isValid);
+  };
+
+  const handleSubmit = () => {
+    if (!formIsValid) {
+      return;
+    }
+
+    history.push("/home");
   };
 
   const getUsers = () => {
@@ -36,8 +75,12 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    getUsers();
+    // getUsers();
   }, []);
+
+  useEffect(() => {
+    hanldeFormSate();
+  });
 
   return (
     <>
@@ -75,6 +118,9 @@ export const Login = () => {
                     name="email"
                     onChange={handleChange}
                   />
+                  <span className="invalid-feedback">
+                    ¡Este campo es requerido!
+                  </span>
                 </div>
                 <div>
                   <input
@@ -85,12 +131,20 @@ export const Login = () => {
                     name="password"
                     onChange={handleChange}
                   />
+                  <span className="invalid-feedback">
+                    ¡Este campo es requerido!
+                  </span>
                 </div>
               </form>
             )}
             {activeTab === "register" && <h2>Registro</h2>}
             <div className="d-flex justify-content-end mb-5">
-              <button type="button" className="btn btn-denim">
+              <button
+                type="button"
+                className="btn btn-denim"
+                disabled={!formIsValid}
+                onClick={handleSubmit}
+              >
                 {activeTab === "login" && "Ingresar"}
                 {activeTab === "register" && "Registro"}
               </button>
