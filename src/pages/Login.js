@@ -53,7 +53,7 @@ export const Login = ({ history }) => {
 
   const [formIsValid, setFormIsValid] = useState(false);
 
-  const hanldeFormSate = () => {
+  const handleFormState = () => {
     const nameVal = formData.name;
     const passVal = formData.password;
 
@@ -114,7 +114,7 @@ export const Login = ({ history }) => {
 
   // EFFECTS
   useEffect(() => {
-    hanldeFormSate();
+    handleFormState();
   });
 
   return (
@@ -186,7 +186,7 @@ export const Login = ({ history }) => {
                 onClick={handleSubmit}
               >
                 {isLoading ? (
-                  <span class="spinner-border spinner-border-sm"></span>
+                  <span className="spinner-border spinner-border-sm"></span>
                 ) : (
                   <>
                     {activeTab === "login" && "Ingresar"}

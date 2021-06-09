@@ -8,6 +8,8 @@ import {
 import { Login } from "../pages/Login";
 import { Dashboard } from "../pages/Dashboard";
 import { AuthContext } from "../auth/AuthContext";
+import { TransactionDetail } from "../pages/TransactionDetail";
+import { LayoutApp } from "../layout/LayoutApp";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const { user } = useContext(AuthContext);
@@ -36,10 +38,17 @@ const PublicRoute = ({ component: Component, ...rest }) => {
 export const AppRouter = () => {
   return (
     <Router>
-      <Switch>
-        <PublicRoute path="/login" component={Login} />
-        <PrivateRoute path="/dashboard" component={Dashboard} />
-      </Switch>
+      <LayoutApp>
+        <Switch>
+          <PublicRoute path="/login" component={Login} />
+          <PrivateRoute path="/dashboard" component={Dashboard} />
+          <PrivateRoute path="/transaction/:id" component={TransactionDetail} />
+
+          <Route path="/">
+            <Redirect to="/login" />
+          </Route>
+        </Switch>
+      </LayoutApp>
     </Router>
   );
 };
