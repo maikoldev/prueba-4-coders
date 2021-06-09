@@ -7,7 +7,15 @@ export const Dashboard = () => {
   const history = useHistory();
 
   const [transactions, setTransactions] = useState([]);
+  const [filterTrans, setFilterTrans] = useState([]);
   const [totalAmount, setTotalAmount] = useState("");
+
+  const filterArray = ({ target }) => {
+    const items = transactions.filter((trans) =>
+      trans.description.toLowerCase().includes(target.value.toLowerCase())
+    );
+    setFilterTrans(items);
+  };
 
   const [formData, setFormData] = useState({
     email: "qcristianesteban@gmail.com",
@@ -86,6 +94,7 @@ export const Dashboard = () => {
     getTransactions()
       .then((res) => {
         setTransactions(res.data);
+        setFilterTrans(res.data);
         getTotalAmount(res.data);
       })
       .catch((error) => {
@@ -163,6 +172,14 @@ export const Dashboard = () => {
           <div className="card">
             <div className="card-body p-4">
               <h5 className="title">Últimas Transacciones</h5>
+              <div class="d-flex mb-3">
+                <input
+                  class="form-control"
+                  type="search"
+                  placeholder="Buscar"
+                  onChange={filterArray}
+                />
+              </div>
               <div className="table-responsive">
                 <table className="table table-hover">
                   <thead>
@@ -175,7 +192,7 @@ export const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {transactions.map((item) => {
+                    {filterTrans.map((item) => {
                       return (
                         <tr
                           key={item.id}
