@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import axios from "axios";
+import { AuthContext } from "../auth/AuthContext";
+import { Alert } from "../components/Alert";
 
 export const Login = ({ history }) => {
-  const [activeTab, setActiveTab] = useState("login");
-  const [users, setUsers] = useState([]);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+  // STATES
+  const { setUser } = useContext(AuthContext);
+
+  const [alertData, setAlertData] = useState({
+    msg: "",
+    variant: "",
   });
 
-  const [formIsValid, setFormIsValid] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
 
-  const { email, password } = formData;
+  const [formData, setFormData] = useState({
+    name: "Andres",
+    password: "bn$}@$Q6gD*4c_hS%V#+:",
+  });
 
-  const handleTab = ({ target }) => {
-    setActiveTab(target.dataset.tab);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
+  // METHODS
   const handleChange = ({ target }) => {
     isValid(target);
 
@@ -27,14 +32,17 @@ export const Login = ({ history }) => {
     });
   };
 
+  const handleTab = ({ target }) => {
+    setActiveTab(target.dataset.tab);
+  };
+
   const isValid = (el) => {
     const val = el.value;
     const name = el.name;
 
-    const emailRules = name === "email" && !val.includes("@");
     const passRules = name === "password" && val.length < 8;
 
-    if (val === "" || passRules || emailRules) {
+    if (val === "" || passRules) {
       el.classList.add("is-invalid");
       el.classList.remove("is-valid");
     } else {
@@ -43,14 +51,15 @@ export const Login = ({ history }) => {
     }
   };
 
+  const [formIsValid, setFormIsValid] = useState(false);
+
   const hanldeFormSate = () => {
-    const emailVal = formData.email;
+    const nameVal = formData.name;
     const passVal = formData.password;
 
-    const emailRules = emailVal != "" && emailVal.includes("@");
-    const passRules = passVal != "" && passVal.length >= 8;
+    const passRules = passVal !== "" && passVal.length >= 8;
+    const isValid = nameVal !== "" && passRules ? true : false;
 
-    const isValid = passRules & emailRules ? true : false;
     setFormIsValid(isValid);
   };
 
@@ -59,25 +68,51 @@ export const Login = ({ history }) => {
       return;
     }
 
-    history.push("/home");
-  };
+    setIsLoading(true);
 
-  const getUsers = () => {
-    axios
-      .post(`https://core-ve74dbrnra-uc.a.run.app/read-users`)
+    getUser()
       .then((res) => {
-        const users = res.data;
-        setUsers(users);
+        const user = res.data[0];
+
+        if (
+          user.name === formData.name &&
+          user.paswword === formData.password
+        ) {
+          const userData = {
+            name: formData.name,
+            password: formData.password,
+            isLogged: true,
+          };
+          localStorage.setItem("userData", JSON.stringify(userData));
+          setUser(userData);
+
+          history.push("/dashboard");
+        } else {
+          setAlertData({ msg: "Usuario no es correcto", variant: "danger" });
+        }
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(() => {
+        setAlertData({ msg: "Hubo un error", variant: "danger" });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
-  useEffect(() => {
-    // getUsers();
-  }, []);
+  const getUser = async () => {
+    return new Promise((resolve, reject) => {
+      axios
+        .post(`https://core-ve74dbrnra-uc.a.run.app/read-users`)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
+  };
 
+  // EFFECTS
   useEffect(() => {
     hanldeFormSate();
   });
@@ -111,11 +146,11 @@ export const Login = ({ history }) => {
               <form className="mb-5">
                 <div className="mb-3">
                   <input
-                    type="email"
+                    type="text"
                     className="form-control"
-                    placeholder="Correo Electronico"
-                    value={email}
-                    name="email"
+                    placeholder="Usuario"
+                    value={formData.name}
+                    name="name"
                     onChange={handleChange}
                   />
                   <span className="invalid-feedback">
@@ -127,7 +162,7 @@ export const Login = ({ history }) => {
                     type="password"
                     className="form-control"
                     placeholder="Contraseña"
-                    value={password}
+                    value={formData.password}
                     name="password"
                     onChange={handleChange}
                   />
@@ -135,6 +170,11 @@ export const Login = ({ history }) => {
                     ¡Este campo es requerido!
                   </span>
                 </div>
+                {alertData.msg && (
+                  <div className="mt-3">
+                    <Alert msg={alertData.msg} variant={alertData.variant} />
+                  </div>
+                )}
               </form>
             )}
             {activeTab === "register" && <h2>Registro</h2>}
@@ -142,11 +182,17 @@ export const Login = ({ history }) => {
               <button
                 type="button"
                 className="btn btn-denim"
-                disabled={!formIsValid}
+                disabled={!formIsValid || isLoading}
                 onClick={handleSubmit}
               >
-                {activeTab === "login" && "Ingresar"}
-                {activeTab === "register" && "Registro"}
+                {isLoading ? (
+                  <span class="spinner-border spinner-border-sm"></span>
+                ) : (
+                  <>
+                    {activeTab === "login" && "Ingresar"}
+                    {activeTab === "register" && "Registro"}
+                  </>
+                )}
               </button>
             </div>
             <div className="text-center">
