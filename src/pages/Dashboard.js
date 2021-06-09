@@ -172,9 +172,9 @@ export const Dashboard = () => {
           <div className="card">
             <div className="card-body p-4">
               <h5 className="title">Últimas Transacciones</h5>
-              <div class="d-flex mb-3">
+              <div className="d-flex mb-3">
                 <input
-                  class="form-control"
+                  className="form-control"
                   type="search"
                   placeholder="Buscar"
                   onChange={filterArray}

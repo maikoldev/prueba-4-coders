@@ -38,17 +38,19 @@ const PublicRoute = ({ component: Component, ...rest }) => {
 export const AppRouter = () => {
   return (
     <Router>
-      <LayoutApp>
-        <Switch>
-          <PublicRoute path="/login" component={Login} />
+      <Switch>
+        <PublicRoute path="/login" component={Login} />
+        <LayoutApp>
           <PrivateRoute path="/dashboard" component={Dashboard} />
           <PrivateRoute path="/transaction/:id" component={TransactionDetail} />
-
-          <Route path="/">
-            <Redirect to="/login" />
-          </Route>
-        </Switch>
-      </LayoutApp>
+          <PrivateRoute path="*">
+            <Redirect to="/dashboard" />
+          </PrivateRoute>
+        </LayoutApp>
+        <Route path="/">
+          <Redirect to="/login" />
+        </Route>
+      </Switch>
     </Router>
   );
 };
